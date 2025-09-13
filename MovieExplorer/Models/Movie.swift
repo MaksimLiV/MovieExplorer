@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Movie {
+struct Movie: Codable {
     let id: Int
     let title: String
     let originalTitle: String
@@ -23,17 +23,30 @@ struct Movie {
     let video: Bool
     let genreIds: [Int]
     
-    var releaseYear: String {
+    enum CodingKeys: String, CodingKey {
+        case id, title, overview, adult, video, popularity
+        case originalTitle = "original_title"
+        case releaseDate = "release_date"
+        case posterPath = "poster_path"
+        case backdropPath = "backdrop_path"
+        case voteAverage = "vote_average"
+        case voteCount = "vote_count"
+        case originalLanguage = "original_language"
+        case genreIds = "genre_ids"
+    }
+        var releaseYear: String {
         String(releaseDate.prefix(4))
+    
     }
     
-    var fullPosterPath: String? {
+    var fullPosterURL: String? {
+    
         guard let posterPath = posterPath else { return nil }
-        return "https://image.tmdb.org/t/p/w500\(posterPath)"
+        return "\(APIKey.tmdbImageBaseURL)/w500\(posterPath)"
     }
     
-    var fullBackdropPath: String? {
+    var fullBackdropURL: String? {
         guard let backdropPath = backdropPath else { return nil }
-        return "https://image.tmdb.org/t/p/w1280\(backdropPath)"
+        return "\(APIKey.tmdbImageBaseURL)/w1280\(backdropPath)"
     }
 }

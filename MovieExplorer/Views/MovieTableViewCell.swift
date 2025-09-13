@@ -9,7 +9,6 @@ import UIKit
 
 class MovieTableViewCell: UITableViewCell {
     
-    // MARK: - UI Elements
     private let posterImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -46,8 +45,6 @@ class MovieTableViewCell: UITableViewCell {
         return label
     }()
     
-    
-    // MARK: - Initialization
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
@@ -57,13 +54,11 @@ class MovieTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - UI Setup
     private func setupUI() {
         contentView.addSubview(posterImageView)
         contentView.addSubview(titleLabel)
         contentView.addSubview(yearLabel)
         contentView.addSubview(overviewLabel)
-        
         setupConstraints()
     }
     
@@ -86,30 +81,24 @@ class MovieTableViewCell: UITableViewCell {
             overviewLabel.leadingAnchor.constraint(equalTo: posterImageView.trailingAnchor, constant: 12),
             overviewLabel.topAnchor.constraint(equalTo: yearLabel.bottomAnchor, constant: 4),
             overviewLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            overviewLabel.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -8),
+            overviewLabel.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -8)
         ])
     }
     
-    // MARK: - Configuration
     func configure(with movie: Movie) {
         titleLabel.text = movie.title
         yearLabel.text = movie.releaseYear
         overviewLabel.text = movie.overview
         
-        if let posterPath = movie.posterPath {
-            posterImageView.image = UIImage(named: posterPath)
-        } else {
-            posterImageView.image = UIImage(systemName: "photo")
-        }
+        let placeholderImage = UIImage(systemName: "photo")
+        posterImageView.loadImage(from: movie.fullPosterURL, placeholder: placeholderImage)
     }
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        
         titleLabel.text = nil
         yearLabel.text = nil
         overviewLabel.text = nil
-        
-        posterImageView.image = nil
+        posterImageView.image = UIImage(systemName: "photo")
     }
 }
