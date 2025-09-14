@@ -10,6 +10,7 @@ import UIKit
 class DetailViewController: UIViewController {
     
     private let movie: Movie
+    private var isFavorite: Bool = false
     
     // MARK: - UI Elements
     private let scrollView: UIScrollView = {
@@ -24,11 +25,11 @@ class DetailViewController: UIViewController {
         return view
     }()
     
-    // Header section with simple background color
+    // Header section with background color
     private let headerContainerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemOrange  // Простой оранжевый фон
+        view.backgroundColor = .systemOrange
         return view
     }()
     
@@ -142,6 +143,7 @@ class DetailViewController: UIViewController {
         setupUI()
         setupNavigationBar()
         configureWithMovieData()
+        checkFavoriteStatus()
     }
     
     private func setupUI() {
@@ -174,7 +176,6 @@ class DetailViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        // Heart button in navigation bar - transparent with blue border
         let favoriteButton = UIBarButtonItem(
             image: UIImage(systemName: "heart"),
             style: .plain,
@@ -186,7 +187,8 @@ class DetailViewController: UIViewController {
     }
     
     @objc private func favoriteButtonTapped() {
-        print("Favorite tapped for: \(movie.title)")
+        UserDefaults.standard.toggleFavorite(movie)
+        checkFavoriteStatus()
     }
     
     private func setupConstraints() {
@@ -210,8 +212,8 @@ class DetailViewController: UIViewController {
             headerContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             
             // Poster constraints
-            posterImageView.topAnchor.constraint(equalTo: headerContainerView.topAnchor, constant: 16),
-            posterImageView.leadingAnchor.constraint(equalTo: headerContainerView.leadingAnchor, constant: 16),
+            posterImageView.topAnchor.constraint(equalTo: headerContainerView.topAnchor, constant: 5),
+            posterImageView.leadingAnchor.constraint(equalTo: headerContainerView.leadingAnchor, constant: 5),
             posterImageView.widthAnchor.constraint(equalToConstant: 100),
             posterImageView.heightAnchor.constraint(equalToConstant: 150),
             
@@ -292,5 +294,16 @@ class DetailViewController: UIViewController {
         } else {
             posterImageView.image = UIImage(systemName: "photo")
         }
+    }
+    
+    // MARK: - Favorites Management
+    private func checkFavoriteStatus() {
+        isFavorite = UserDefaults.standard.isFavorite(movie)
+        updateFavoriteButton()
+    }
+    
+    private func updateFavoriteButton() {
+        let imageName = isFavorite ? "heart.fill" : "heart"
+        navigationItem.rightBarButtonItem?.image = UIImage(systemName: imageName)
     }
 }

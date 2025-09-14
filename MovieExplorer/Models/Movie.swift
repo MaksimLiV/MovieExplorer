@@ -34,13 +34,13 @@ struct Movie: Codable {
         case originalLanguage = "original_language"
         case genreIds = "genre_ids"
     }
-        var releaseYear: String {
+    var releaseYear: String {
         String(releaseDate.prefix(4))
-    
+        
     }
     
     var fullPosterURL: String? {
-    
+        
         guard let posterPath = posterPath else { return nil }
         return "\(APIKey.tmdbImageBaseURL)/w500\(posterPath)"
     }

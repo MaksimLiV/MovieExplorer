@@ -17,23 +17,24 @@ class NetworkService {
     }
     
     // MARK: - Search Movies
-    private func buildSearchURL(query: String) -> URL? {
-        print("--- Building Search URL ---")
-        print("Base URL: \(APIKey.tmdbBaseURL)")
-        print("API Key: \(APIKey.tmdbAPIKey)")
-        print("Search query: '\(query)'")
+    private func buildSearchURL(query: String, page: Int = 1, year: Int? = nil) -> URL? {
         
-        // Create full base URL including API version
         let fullBaseURL = "\(APIKey.tmdbBaseURL)/search/movie"
         var components = URLComponents(string: fullBaseURL)
         
-        components?.queryItems = [
+        var queryItems = [
             URLQueryItem(name: "api_key", value: APIKey.tmdbAPIKey),
-            URLQueryItem(name: "query", value: query)
+            URLQueryItem(name: "query", value: query),
+            URLQueryItem(name: "page", value: "\(page)")
         ]
         
+        if let year = year {
+            queryItems.append(URLQueryItem(name: "primary_release_year", value: "\(year)"))
+        }
+        
+        components?.queryItems = queryItems
+        
         if let finalURL = components?.url {
-            print("Final Search URL: \(finalURL.absoluteString)")
             return finalURL
         } else {
             print("ERROR: Failed to create search URL from components")
@@ -41,11 +42,9 @@ class NetworkService {
         }
     }
     
-    func searchMovies(query: String, completion: @escaping(Result<[Movie], Error>) -> Void) {
-        print("=== STARTING SEARCH REQUEST ===")
-        print("Query: '\(query)'")
+    func searchMovies(query: String, page: Int = 1, year: Int? = nil, completion: @escaping(Result<MovieResponse, Error>) -> Void) {
         
-        guard let url = buildSearchURL(query: query) else {
+        guard let url = buildSearchURL(query: query, page: page, year: year) else {
             print("ERROR: Failed to create search URL")
             completion(.failure(NetworkError.inValidURL))
             return
@@ -54,9 +53,40 @@ class NetworkService {
         performRequest(url: url, requestType: "SEARCH", completion: completion)
     }
     
-    // MARK: - Trending Movies
+    // MARK: - Discover Movies
+    private func buildDiscoverURL(page: Int = 1, year: Int) -> URL? {
+        let discoverURL = "\(APIKey.tmdbBaseURL)/discover/movie"
+        var components = URLComponents(string: discoverURL)
+        
+        components?.queryItems = [
+            URLQueryItem(name: "api_key", value: APIKey.tmdbAPIKey),
+            URLQueryItem(name: "page", value: "\(page)"),
+            URLQueryItem(name: "primary_release_year", value: "\(year)"),
+            URLQueryItem(name: "sort_by", value: "popularity.desc"),
+            URLQueryItem(name: "vote_count.gte", value: "10")
+        ]
+        
+        if let finalURL = components?.url {
+            return finalURL
+        } else {
+            print("ERROR: Failed to create discover URL")
+            return nil
+        }
+    }
+    
+    func getMoviesForYear(year: Int, page: Int = 1, completion: @escaping(Result<MovieResponse, Error>) -> Void) {
+        
+        guard let url = buildDiscoverURL(page: page, year: year) else {
+            print("ERROR: Failed to create discover URL")
+            completion(.failure(NetworkError.inValidURL))
+            return
+        }
+        
+        performRequest(url: url, requestType: "DISCOVER", completion: completion)
+    }
+    
+    // MARK: - Legacy Trending Movies 
     private func buildTrendingURL() -> URL? {
-        print("--- Building Trending URL ---")
         let trendingURL = "\(APIKey.tmdbBaseURL)/trending/movie/day"
         var components = URLComponents(string: trendingURL)
         
@@ -65,7 +95,6 @@ class NetworkService {
         ]
         
         if let finalURL = components?.url {
-            print("Final Trending URL: \(finalURL.absoluteString)")
             return finalURL
         } else {
             print("ERROR: Failed to create trending URL")
@@ -73,8 +102,7 @@ class NetworkService {
         }
     }
     
-    func getTrendingMovies(completion: @escaping(Result<[Movie], Error>) -> Void) {
-        print("=== STARTING TRENDING REQUEST ===")
+    func getTrendingMovies(completion: @escaping(Result<MovieResponse, Error>) -> Void) {
         
         guard let url = buildTrendingURL() else {
             print("ERROR: Failed to create trending URL")
@@ -86,22 +114,17 @@ class NetworkService {
     }
     
     // MARK: - Common Request Handler
-    private func performRequest(url: URL, requestType: String, completion: @escaping(Result<[Movie], Error>) -> Void) {
-        print("Performing \(requestType) request to: \(url.absoluteString)")
+    private func performRequest(url: URL, requestType: String, completion: @escaping(Result<MovieResponse, Error>) -> Void) {
         
         self.urlSession.dataTask(with: url) { data, response, error in
-            print("=== RECEIVED \(requestType) RESPONSE ===")
             
             if let error = error {
                 print("\(requestType) NETWORK ERROR: \(error)")
-                print("Error code: \((error as NSError).code)")
-                print("Error domain: \((error as NSError).domain)")
                 completion(.failure(error))
                 return
             }
             
             if let httpResponse = response as? HTTPURLResponse {
-                print("\(requestType) HTTP Status: \(httpResponse.statusCode)")
                 if httpResponse.statusCode != 200 {
                     print("Server returned non-200 status code for \(requestType)")
                     completion(.failure(NetworkError.serverError(httpResponse.statusCode)))
@@ -115,12 +138,9 @@ class NetworkService {
                 return
             }
             
-            print("\(requestType) received data: \(data.count) bytes")
-            
             do {
                 let movieResponse = try self.jsonDecoder.decode(MovieResponse.self, from: data)
-                print("Successfully decoded \(movieResponse.results.count) movies for \(requestType)")
-                completion(.success(movieResponse.results))
+                completion(.success(movieResponse))
             } catch {
                 print("\(requestType) DECODING ERROR: \(error)")
                 if let jsonString = String(data: data, encoding: .utf8) {

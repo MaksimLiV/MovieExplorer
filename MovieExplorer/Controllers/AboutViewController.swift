@@ -28,6 +28,9 @@ class AboutViewController: UIViewController {
         Discover trending movies and build your personal favorites collection.
         
         Data provided by The Movie Database (TMDB)
+        
+        Developed by: Maksim Li 
+        
         """
         infoLabel.numberOfLines = 0
         infoLabel.textAlignment = .center

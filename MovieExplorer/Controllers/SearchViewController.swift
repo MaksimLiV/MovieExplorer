@@ -9,49 +9,66 @@ import UIKit
 
 class SearchViewController: UIViewController {
     
+    // MARK: - UI Elements
     private let tableView: UITableView = {
         let table = UITableView()
+        table.translatesAutoresizingMaskIntoConstraints = false
+        table.separatorStyle = .none
+        table.rowHeight = UITableView.automaticDimension
+        table.estimatedRowHeight = 110
         return table
     }()
     
-    private var movies: [Movie] = []
-    
     private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
         searchBar.placeholder = "Search movies..."
         searchBar.searchBarStyle = .minimal
         return searchBar
     }()
     
-    private let networkService = NetworkService()
-    
     private let activityIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .large)
+        indicator.translatesAutoresizingMaskIntoConstraints = false
         indicator.hidesWhenStopped = true
         indicator.color = .systemBlue
         return indicator
     }()
     
+    private let bottomLoadingIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .medium)
+        indicator.hidesWhenStopped = true
+        indicator.color = .systemBlue
+        return indicator
+    }()
+    
+    // MARK: - Data & State
+    private var movies: [Movie] = []
+    private let networkService = NetworkService()
+    
+    // Pagination & filtering
+    private var currentPage = 1
+    private var isLoadingMore = false
+    private var canLoadMore = true
+    private let currentYear = Calendar.current.component(.year, from: Date())
+    
+    // Search state
+    private var searchMode = false
+    private var currentSearchQuery = ""
+    
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         setupUI()
-        setupSearchAndTable()
-        setupNavigationButtons()
-        
-        title = "Movie Search"
-        
-        navigationItem.backBarButtonItem = UIBarButtonItem(title: "Movie Search", style: .plain, target: nil, action: nil)
-        
-        loadTrendingMovies()
+        setupTableView()
+        setupNavigationBar()
+        loadCurrentYearMovies()
     }
     
+    // MARK: - Setup Methods
     private func setupUI() {
         view.backgroundColor = .systemBackground
-        
-        searchBar.translatesAutoresizingMaskIntoConstraints = false
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        title = "Movie Search"
         
         view.addSubview(searchBar)
         view.addSubview(tableView)
@@ -76,23 +93,32 @@ class SearchViewController: UIViewController {
         ])
     }
     
-    private func setupSearchAndTable() {
+    private func setupTableView() {
         tableView.register(MovieTableViewCell.self, forCellReuseIdentifier: "MovieCell")
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.separatorStyle = .none
-        tableView.rowHeight = 110
         searchBar.delegate = self
     }
     
-    private func setupNavigationButtons() {
-        let aboutButton = UIBarButtonItem(title: "About", style: .plain, target: self, action: #selector(aboutTapped))
-        navigationItem.leftBarButtonItem = aboutButton
+    private func setupNavigationBar() {
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: "Movie Search", style: .plain, target: nil, action: nil)
         
-        let favoritesButton = UIBarButtonItem(title: "Favorites", style: .plain, target: self, action: #selector(favoritesTapped))
-        navigationItem.rightBarButtonItem = favoritesButton
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            title: "About",
+            style: .plain,
+            target: self,
+            action: #selector(aboutTapped)
+        )
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            title: "Favorites",
+            style: .plain,
+            target: self,
+            action: #selector(favoritesTapped)
+        )
     }
     
+    // MARK: - Navigation Actions
     @objc private func aboutTapped() {
         let aboutVC = AboutViewController()
         navigationController?.pushViewController(aboutVC, animated: true)
@@ -103,45 +129,100 @@ class SearchViewController: UIViewController {
         navigationController?.pushViewController(favoritesVC, animated: true)
     }
     
-    private func loadTrendingMovies() {
-        print("Loading trending movies...")
+    // MARK: - Data Loading
+    private func loadCurrentYearMovies() {
+        resetPagination()
+        searchMode = false
+        
         activityIndicator.startAnimating()
         
-        networkService.getTrendingMovies { [weak self] result in
+        networkService.getMoviesForYear(year: currentYear, page: currentPage) { [weak self] result in
             DispatchQueue.main.async {
-                self?.activityIndicator.stopAnimating()
-                
-                switch result {
-                case .success(let movies):
-                    self?.movies = movies
-                    self?.tableView.reloadData()
-                    print("Loaded \(movies.count) trending movies")
-                case .failure(let error):
-                    print("Failed to load trending movies: \(error)")
-                }
+                self?.handleMoviesResult(result, isLoadingMore: false)
             }
         }
     }
     
     private func searchMovies(query: String) {
-        print("Searching movies: \(query)")
+        resetPagination()
+        searchMode = true
+        currentSearchQuery = query
+        
         activityIndicator.startAnimating()
         
-        networkService.searchMovies(query: query) {
-            [weak self] result in
+        networkService.searchMovies(query: query, page: currentPage, year: currentYear) { [weak self] result in
             DispatchQueue.main.async {
-                self?.activityIndicator.stopAnimating()
-                
-                switch result {
-                case .success(let movies):
-                    self?.movies = movies
-                    self?.tableView.reloadData()
-                    print("Found \(movies.count) movies for query: \(query)")
-                case .failure(let error):
-                    self?.showError(error)
-                }
+                self?.handleMoviesResult(result, isLoadingMore: false)
             }
         }
+    }
+    
+    private func loadMoreMovies() {
+        guard !isLoadingMore && canLoadMore else { return }
+        
+        isLoadingMore = true
+        currentPage += 1
+        showBottomLoader()
+        
+        let completion: (Result<MovieResponse, Error>) -> Void = { [weak self] result in
+            DispatchQueue.main.async {
+                self?.handleMoviesResult(result, isLoadingMore: true)
+            }
+        }
+        
+        if searchMode {
+            networkService.searchMovies(query: currentSearchQuery, page: currentPage, year: currentYear, completion: completion)
+        } else {
+            networkService.getMoviesForYear(year: currentYear, page: currentPage, completion: completion)
+        }
+    }
+    
+    // MARK: - Helper Methods
+    private func resetPagination() {
+        currentPage = 1
+        canLoadMore = true
+        isLoadingMore = false
+    }
+    
+    private func handleMoviesResult(_ result: Result<MovieResponse, Error>, isLoadingMore: Bool) {
+        activityIndicator.stopAnimating()
+        
+        if isLoadingMore {
+            self.isLoadingMore = false
+            hideBottomLoader()
+        }
+        
+        switch result {
+        case .success(let response):
+            if isLoadingMore {
+                if response.page >= response.totalPages {
+                    canLoadMore = false
+                } else {
+                    movies.append(contentsOf: response.results)
+                    tableView.reloadData()
+                }
+            } else {
+                movies = response.results
+                tableView.reloadData()
+                canLoadMore = response.page < response.totalPages
+            }
+            
+        case .failure(let error):
+            if isLoadingMore {
+                currentPage -= 1 // Rollback
+            }
+            showError(error)
+        }
+    }
+    
+    private func showBottomLoader() {
+        bottomLoadingIndicator.startAnimating()
+        tableView.tableFooterView = bottomLoadingIndicator
+    }
+    
+    private func hideBottomLoader() {
+        bottomLoadingIndicator.stopAnimating()
+        tableView.tableFooterView = nil
     }
     
     private func showError(_ error: Error) {
@@ -155,8 +236,8 @@ class SearchViewController: UIViewController {
     }
 }
 
+// MARK: - UITableViewDataSource
 extension SearchViewController: UITableViewDataSource {
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return movies.count
     }
@@ -173,6 +254,7 @@ extension SearchViewController: UITableViewDataSource {
     }
 }
 
+// MARK: - UITableViewDelegate
 extension SearchViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
@@ -181,12 +263,23 @@ extension SearchViewController: UITableViewDelegate {
         let detailVC = DetailViewController(movie: selectedMovie)
         navigationController?.pushViewController(detailVC, animated: true)
     }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let threshold = scrollView.frame.height * 0.8 // Адаптивный threshold
+        let contentHeight = scrollView.contentSize.height
+        let scrollPosition = scrollView.contentOffset.y + scrollView.frame.size.height
+        
+        if scrollPosition > contentHeight - threshold && canLoadMore && !isLoadingMore {
+            loadMoreMovies()
+        }
+    }
 }
 
+// MARK: - UISearchBarDelegate
 extension SearchViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
-        guard let query = searchBar.text, !query.trimmingCharacters(in: .whitespaces).isEmpty else {
+        guard let query = searchBar.text?.trimmingCharacters(in: .whitespaces), !query.isEmpty else {
             return
         }
         searchMovies(query: query)
@@ -194,7 +287,7 @@ extension SearchViewController: UISearchBarDelegate {
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText.isEmpty {
-            loadTrendingMovies()
+            loadCurrentYearMovies()
         }
     }
 }
