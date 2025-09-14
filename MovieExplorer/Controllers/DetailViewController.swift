@@ -63,7 +63,7 @@ class DetailViewController: UIViewController {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Description"
-        label.font = .boldSystemFont(ofSize: 16)
+        label.font = .systemFont(ofSize: 14)
         label.textColor = .label
         return label
     }()
@@ -71,7 +71,7 @@ class DetailViewController: UIViewController {
     private let descriptionLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 14)
+        label.font = .boldSystemFont(ofSize: 16)
         label.textColor = .label
         label.numberOfLines = 0
         return label
@@ -81,7 +81,7 @@ class DetailViewController: UIViewController {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Release date"
-        label.font = .boldSystemFont(ofSize: 16)
+        label.font = .systemFont(ofSize: 14)
         label.textColor = .label
         return label
     }()
@@ -89,7 +89,7 @@ class DetailViewController: UIViewController {
     private let releaseDateLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 14)
+        label.font = .boldSystemFont(ofSize: 16)
         label.textColor = .label
         return label
     }()
@@ -98,7 +98,7 @@ class DetailViewController: UIViewController {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "User rating"
-        label.font = .boldSystemFont(ofSize: 16)
+        label.font = .systemFont(ofSize: 14)
         label.textColor = .label
         return label
     }()
@@ -106,7 +106,7 @@ class DetailViewController: UIViewController {
     private let ratingLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 14)
+        label.font = .boldSystemFont(ofSize: 16)
         label.textColor = .label
         return label
     }()
@@ -115,7 +115,7 @@ class DetailViewController: UIViewController {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Adult"
-        label.font = .boldSystemFont(ofSize: 16)
+        label.font = .systemFont(ofSize: 14)
         label.textColor = .label
         return label
     }()
@@ -123,7 +123,7 @@ class DetailViewController: UIViewController {
     private let adultLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 14)
+        label.font = .boldSystemFont(ofSize: 16)
         label.textColor = .label
         return label
     }()
