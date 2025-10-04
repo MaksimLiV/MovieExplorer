@@ -62,7 +62,7 @@ class NetworkService {
             URLQueryItem(name: "api_key", value: APIKey.tmdbAPIKey),
             URLQueryItem(name: "page", value: "\(page)"),
             URLQueryItem(name: "primary_release_year", value: "\(year)"),
-            URLQueryItem(name: "sort_by", value: "popularity.desc"),
+            URLQueryItem(name: "sort_by", value: "vote_average.desc"),
             URLQueryItem(name: "vote_count.gte", value: "10")
         ]
         

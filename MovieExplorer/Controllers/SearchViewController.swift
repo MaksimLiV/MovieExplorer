@@ -68,7 +68,7 @@ class SearchViewController: UIViewController {
     // MARK: - Setup Methods
     private func setupUI() {
         view.backgroundColor = .systemBackground
-        title = "Movie Search"
+        title = "Films"
         
         view.addSubview(searchBar)
         view.addSubview(tableView)
@@ -101,7 +101,7 @@ class SearchViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        navigationItem.backBarButtonItem = UIBarButtonItem(title: "Movie Search", style: .plain, target: nil, action: nil)
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: "Films", style: .plain, target: nil, action: nil)
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             title: "About",
@@ -150,7 +150,7 @@ class SearchViewController: UIViewController {
         
         activityIndicator.startAnimating()
         
-        networkService.searchMovies(query: query, page: currentPage, year: currentYear) { [weak self] result in
+        networkService.searchMovies(query: query, page: currentPage, year: nil) { [weak self] result in
             DispatchQueue.main.async {
                 self?.handleMoviesResult(result, isLoadingMore: false)
             }
@@ -171,7 +171,7 @@ class SearchViewController: UIViewController {
         }
         
         if searchMode {
-            networkService.searchMovies(query: currentSearchQuery, page: currentPage, year: currentYear, completion: completion)
+            networkService.searchMovies(query: currentSearchQuery, page: currentPage, year: nil, completion: completion)
         } else {
             networkService.getMoviesForYear(year: currentYear, page: currentPage, completion: completion)
         }
