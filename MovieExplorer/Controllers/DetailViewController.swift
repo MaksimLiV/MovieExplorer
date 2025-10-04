@@ -150,6 +150,13 @@ class DetailViewController: UIViewController {
         return view
     }()
     
+    private let separatorLine4: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .systemGray4
+        return view
+    }()
+    
     init(movie: Movie) {
         self.movie = movie
         super.init(nibName: nil, bundle: nil)
@@ -199,6 +206,7 @@ class DetailViewController: UIViewController {
         infoContainerView.addSubview(separatorLine1)
         infoContainerView.addSubview(separatorLine2)
         infoContainerView.addSubview(separatorLine3)
+        infoContainerView.addSubview(separatorLine4)
         
         setupConstraints()
     }
@@ -309,7 +317,13 @@ class DetailViewController: UIViewController {
             adultLabel.topAnchor.constraint(equalTo: adultTitleLabel.bottomAnchor, constant: 1),
             adultLabel.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
             adultLabel.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
-            adultLabel.bottomAnchor.constraint(equalTo: infoContainerView.bottomAnchor, constant: -20)
+    
+            separatorLine4.topAnchor.constraint(equalTo: adultLabel.bottomAnchor, constant: 12),
+            separatorLine4.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
+            separatorLine4.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
+            separatorLine4.heightAnchor.constraint(equalToConstant: 0.5),
+            
+            separatorLine4.bottomAnchor.constraint(equalTo: infoContainerView.bottomAnchor, constant: -16)
         ])
     }
     
