@@ -129,6 +129,27 @@ class DetailViewController: UIViewController {
         return label
     }()
     
+    private let separatorLine1: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .systemGray4
+        return view
+    }()
+    
+    private let separatorLine2: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .systemGray4
+        return view
+    }()
+    
+    private let separatorLine3: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .systemGray4
+        return view
+    }()
+    
     init(movie: Movie) {
         self.movie = movie
         super.init(nibName: nil, bundle: nil)
@@ -165,12 +186,19 @@ class DetailViewController: UIViewController {
         // Add elements to info section
         infoContainerView.addSubview(descriptionTitleLabel)
         infoContainerView.addSubview(descriptionLabel)
+        
         infoContainerView.addSubview(releaseDateTitleLabel)
         infoContainerView.addSubview(releaseDateLabel)
+        
         infoContainerView.addSubview(ratingTitleLabel)
         infoContainerView.addSubview(ratingLabel)
+        
         infoContainerView.addSubview(adultTitleLabel)
         infoContainerView.addSubview(adultLabel)
+        
+        infoContainerView.addSubview(separatorLine1)
+        infoContainerView.addSubview(separatorLine2)
+        infoContainerView.addSubview(separatorLine3)
         
         setupConstraints()
     }
@@ -212,7 +240,7 @@ class DetailViewController: UIViewController {
             headerContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             
             // Poster constraints
-            posterImageView.topAnchor.constraint(equalTo: headerContainerView.topAnchor, constant: 5),
+            posterImageView.topAnchor.constraint(equalTo: headerContainerView.topAnchor, constant: 0),
             posterImageView.leadingAnchor.constraint(equalTo: headerContainerView.leadingAnchor, constant: 5),
             posterImageView.widthAnchor.constraint(equalToConstant: 100),
             posterImageView.heightAnchor.constraint(equalToConstant: 150),
@@ -223,7 +251,7 @@ class DetailViewController: UIViewController {
             titleLabel.centerYAnchor.constraint(equalTo: posterImageView.centerYAnchor),
             
             // Bottom of header container
-            headerContainerView.bottomAnchor.constraint(equalTo: posterImageView.bottomAnchor, constant: 8),
+            headerContainerView.bottomAnchor.constraint(equalTo: posterImageView.bottomAnchor, constant: 0),
             
             // Info container constraints
             infoContainerView.topAnchor.constraint(equalTo: headerContainerView.bottomAnchor),
@@ -236,34 +264,49 @@ class DetailViewController: UIViewController {
             descriptionTitleLabel.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
             descriptionTitleLabel.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
             
-            descriptionLabel.topAnchor.constraint(equalTo: descriptionTitleLabel.bottomAnchor, constant: 4),
+            descriptionLabel.topAnchor.constraint(equalTo: descriptionTitleLabel.bottomAnchor, constant: 1),
             descriptionLabel.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
             descriptionLabel.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
             
+            separatorLine1.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 5),
+            separatorLine1.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
+            separatorLine1.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
+            separatorLine1.heightAnchor.constraint(equalToConstant: 0.5),
+            
             // Release date section
-            releaseDateTitleLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 12),
+            releaseDateTitleLabel.topAnchor.constraint(equalTo: separatorLine1.bottomAnchor, constant: 5),
             releaseDateTitleLabel.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
             releaseDateTitleLabel.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
             
-            releaseDateLabel.topAnchor.constraint(equalTo: releaseDateTitleLabel.bottomAnchor, constant: 4),
+            releaseDateLabel.topAnchor.constraint(equalTo: releaseDateTitleLabel.bottomAnchor, constant: 1),
             releaseDateLabel.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
             releaseDateLabel.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
             
+            separatorLine2.topAnchor.constraint(equalTo: releaseDateLabel.bottomAnchor, constant: 5),
+            separatorLine2.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
+            separatorLine2.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
+            separatorLine2.heightAnchor.constraint(equalToConstant: 0.5),
+            
             // Rating section
-            ratingTitleLabel.topAnchor.constraint(equalTo: releaseDateLabel.bottomAnchor, constant: 12),
+            ratingTitleLabel.topAnchor.constraint(equalTo: separatorLine2.bottomAnchor, constant: 5),
             ratingTitleLabel.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
             ratingTitleLabel.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
             
-            ratingLabel.topAnchor.constraint(equalTo: ratingTitleLabel.bottomAnchor, constant: 4),
+            ratingLabel.topAnchor.constraint(equalTo: ratingTitleLabel.bottomAnchor, constant: 1),
             ratingLabel.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
             ratingLabel.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
             
+            separatorLine3.topAnchor.constraint(equalTo: ratingLabel.bottomAnchor, constant: 5),
+            separatorLine3.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
+            separatorLine3.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
+            separatorLine3.heightAnchor.constraint(equalToConstant: 0.5),
+            
             // Adult section
-            adultTitleLabel.topAnchor.constraint(equalTo: ratingLabel.bottomAnchor, constant: 12),
+            adultTitleLabel.topAnchor.constraint(equalTo: separatorLine3.bottomAnchor, constant: 5),
             adultTitleLabel.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
             adultTitleLabel.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
             
-            adultLabel.topAnchor.constraint(equalTo: adultTitleLabel.bottomAnchor, constant: 4),
+            adultLabel.topAnchor.constraint(equalTo: adultTitleLabel.bottomAnchor, constant: 1),
             adultLabel.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
             adultLabel.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
             adultLabel.bottomAnchor.constraint(equalTo: infoContainerView.bottomAnchor, constant: -20)
