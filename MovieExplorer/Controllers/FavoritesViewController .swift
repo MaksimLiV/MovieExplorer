@@ -10,7 +10,7 @@ import UIKit
 class FavoritesViewController: UIViewController {
     
     // MARK: - UI Elements
-    private let tableView: UITableView = {
+    private lazy var tableView: UITableView = {
         let table = UITableView()
         table.translatesAutoresizingMaskIntoConstraints = false
         table.separatorStyle = .none

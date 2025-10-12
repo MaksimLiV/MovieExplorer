@@ -13,27 +13,44 @@ class DetailViewController: UIViewController {
     private var isFavorite: Bool = false
     
     // MARK: - UI Elements
-    private let scrollView: UIScrollView = {
+    private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         return scrollView
     }()
     
-    private let contentView: UIView = {
+    private lazy var contentView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-    
-    // Header section with background color
-    private let headerContainerView: UIView = {
-        let view = UIView()
+     
+    // Header section with blurred background
+    private lazy var headerContainerView: UIImageView = {
+        let view = UIImageView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemOrange
+        view.clipsToBounds = true
         return view
     }()
     
-    private let posterImageView: UIImageView = {
+    // Background image for blur effect
+    private lazy var headerBackgroundImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        return imageView
+    }()
+    
+    // Blur overlay
+    private lazy var headerBlurView: UIVisualEffectView = {
+        let blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+        let blurView = UIVisualEffectView(effect: blurEffect)
+        blurView.translatesAutoresizingMaskIntoConstraints = false
+        return blurView
+    }()
+    
+    private lazy var posterImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFill
@@ -43,7 +60,7 @@ class DetailViewController: UIViewController {
         return imageView
     }()
     
-    private let titleLabel: UILabel = {
+    private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .boldSystemFont(ofSize: 20)
@@ -53,14 +70,14 @@ class DetailViewController: UIViewController {
     }()
     
     // Info section with white background
-    private let infoContainerView: UIView = {
+    private lazy var infoContainerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .systemBackground
         return view
     }()
     
-    private let descriptionTitleLabel: UILabel = {
+    private lazy var descriptionTitleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Description"
@@ -69,7 +86,7 @@ class DetailViewController: UIViewController {
         return label
     }()
     
-    private let descriptionLabel: UILabel = {
+    private lazy var descriptionLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .boldSystemFont(ofSize: 16)
@@ -78,7 +95,7 @@ class DetailViewController: UIViewController {
         return label
     }()
     
-    private let releaseDateTitleLabel: UILabel = {
+    private lazy var releaseDateTitleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Release date"
@@ -87,7 +104,7 @@ class DetailViewController: UIViewController {
         return label
     }()
     
-    private let releaseDateLabel: UILabel = {
+    private lazy var releaseDateLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .boldSystemFont(ofSize: 16)
@@ -95,7 +112,7 @@ class DetailViewController: UIViewController {
         return label
     }()
     
-    private let ratingTitleLabel: UILabel = {
+    private lazy var ratingTitleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "User rating"
@@ -104,7 +121,7 @@ class DetailViewController: UIViewController {
         return label
     }()
     
-    private let ratingLabel: UILabel = {
+    private lazy var ratingLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .boldSystemFont(ofSize: 16)
@@ -112,7 +129,7 @@ class DetailViewController: UIViewController {
         return label
     }()
     
-    private let adultTitleLabel: UILabel = {
+    private lazy var adultTitleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Adult"
@@ -121,7 +138,7 @@ class DetailViewController: UIViewController {
         return label
     }()
     
-    private let adultLabel: UILabel = {
+    private lazy var adultLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .boldSystemFont(ofSize: 16)
@@ -129,28 +146,28 @@ class DetailViewController: UIViewController {
         return label
     }()
     
-    private let separatorLine1: UIView = {
+    private lazy var separatorLine1: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .systemGray4
         return view
     }()
     
-    private let separatorLine2: UIView = {
+    private lazy var separatorLine2: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .systemGray4
         return view
     }()
     
-    private let separatorLine3: UIView = {
+    private lazy var separatorLine3: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .systemGray4
         return view
     }()
     
-    private let separatorLine4: UIView = {
+    private lazy var separatorLine4: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .systemGray4
@@ -187,6 +204,8 @@ class DetailViewController: UIViewController {
         contentView.addSubview(infoContainerView)
         
         // Add elements to header
+        headerContainerView.addSubview(headerBackgroundImageView)
+        headerContainerView.addSubview(headerBlurView)
         headerContainerView.addSubview(posterImageView)
         headerContainerView.addSubview(titleLabel)
         
@@ -246,6 +265,18 @@ class DetailViewController: UIViewController {
             headerContainerView.topAnchor.constraint(equalTo: contentView.topAnchor),
             headerContainerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             headerContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            
+            // Background image constraints (fills entire header)
+            headerBackgroundImageView.topAnchor.constraint(equalTo: headerContainerView.topAnchor),
+            headerBackgroundImageView.leadingAnchor.constraint(equalTo: headerContainerView.leadingAnchor),
+            headerBackgroundImageView.trailingAnchor.constraint(equalTo: headerContainerView.trailingAnchor),
+            headerBackgroundImageView.bottomAnchor.constraint(equalTo: headerContainerView.bottomAnchor),
+            
+            // Blur view constraints (covers background)
+            headerBlurView.topAnchor.constraint(equalTo: headerContainerView.topAnchor),
+            headerBlurView.leadingAnchor.constraint(equalTo: headerContainerView.leadingAnchor),
+            headerBlurView.trailingAnchor.constraint(equalTo: headerContainerView.trailingAnchor),
+            headerBlurView.bottomAnchor.constraint(equalTo: headerContainerView.bottomAnchor),
             
             // Poster constraints
             posterImageView.topAnchor.constraint(equalTo: headerContainerView.topAnchor, constant: 0),
@@ -317,7 +348,7 @@ class DetailViewController: UIViewController {
             adultLabel.topAnchor.constraint(equalTo: adultTitleLabel.bottomAnchor, constant: 1),
             adultLabel.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
             adultLabel.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
-    
+            
             separatorLine4.topAnchor.constraint(equalTo: adultLabel.bottomAnchor, constant: 12),
             separatorLine4.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
             separatorLine4.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
@@ -348,6 +379,7 @@ class DetailViewController: UIViewController {
         // Load poster image
         if let posterURL = movie.fullPosterURL {
             posterImageView.loadImage(from: posterURL, placeholder: UIImage(systemName: "photo"))
+            headerBackgroundImageView.loadImage(from: posterURL, placeholder: nil)
         } else {
             posterImageView.image = UIImage(systemName: "photo")
         }
