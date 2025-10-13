@@ -27,14 +27,6 @@ class DetailViewController: UIViewController {
      
     // Header section with blurred background
     private lazy var headerContainerView: UIImageView = {
-        let view = UIImageView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.clipsToBounds = true
-        return view
-    }()
-    
-    // Background image for blur effect
-    private lazy var headerBackgroundImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFill
@@ -204,7 +196,6 @@ class DetailViewController: UIViewController {
         contentView.addSubview(infoContainerView)
         
         // Add elements to header
-        headerContainerView.addSubview(headerBackgroundImageView)
         headerContainerView.addSubview(headerBlurView)
         headerContainerView.addSubview(posterImageView)
         headerContainerView.addSubview(titleLabel)
@@ -265,12 +256,6 @@ class DetailViewController: UIViewController {
             headerContainerView.topAnchor.constraint(equalTo: contentView.topAnchor),
             headerContainerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             headerContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            
-            // Background image constraints (fills entire header)
-            headerBackgroundImageView.topAnchor.constraint(equalTo: headerContainerView.topAnchor),
-            headerBackgroundImageView.leadingAnchor.constraint(equalTo: headerContainerView.leadingAnchor),
-            headerBackgroundImageView.trailingAnchor.constraint(equalTo: headerContainerView.trailingAnchor),
-            headerBackgroundImageView.bottomAnchor.constraint(equalTo: headerContainerView.bottomAnchor),
             
             // Blur view constraints (covers background)
             headerBlurView.topAnchor.constraint(equalTo: headerContainerView.topAnchor),
@@ -379,7 +364,7 @@ class DetailViewController: UIViewController {
         // Load poster image
         if let posterURL = movie.fullPosterURL {
             posterImageView.loadImage(from: posterURL, placeholder: UIImage(systemName: "photo"))
-            headerBackgroundImageView.loadImage(from: posterURL, placeholder: nil)
+            headerContainerView.loadImage(from: posterURL, placeholder: nil)
         } else {
             posterImageView.image = UIImage(systemName: "photo")
         }
